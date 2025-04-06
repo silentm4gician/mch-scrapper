@@ -1,5 +1,5 @@
 // /api/anime.js
-import { getAnimePageData } from "../src/services/animeService";
+import { getAnimePageData } from "../src/services/animeService.js";
 
 export default async function handler(req, res) {
   const { url } = req.query;
