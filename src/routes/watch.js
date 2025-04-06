@@ -1,6 +1,8 @@
-// src/routes/watch.js
 import express from "express";
-import { getWatchIframe } from "../services/watchService.js";
+import axios from "axios";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const router = express.Router();
 
@@ -9,13 +11,16 @@ router.get("/watch", async (req, res) => {
   if (!url) return res.status(400).json({ error: "Missing URL" });
 
   try {
-    const iframe = await getWatchIframe(url);
-    if (!iframe) return res.status(404).json({ error: "Iframe no encontrado" });
+    const { data } = await axios.get(process.env.PLAYWRIGHT_SERVICE_URL, {
+      params: { url },
+    });
 
-    res.json({ iframe });
+    res.json(data); // { iframe: ... }
   } catch (error) {
-    console.error("Scraper error:", error);
-    res.status(500).json({ error: "Error al scrapear monoschino2.com" });
+    console.error("Error al contactar con el microservicio:", error.message);
+    res
+      .status(500)
+      .json({ error: "Error al obtener el iframe desde el microservicio" });
   }
 });
 
