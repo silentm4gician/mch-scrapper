@@ -89,7 +89,7 @@ npm install
 2. Crear un archivo `.env`:
 
 ```env
-PLAYWRIGHT_SERVICE_URL=https://mch-playwright-service-production.up.railway.app/api/watch
+PLAYWRIGHT_SERVICE_URL=https://playwright-x-service-production.up.railway.app/api/watch
 ```
 
 3. Correr servidor local:
