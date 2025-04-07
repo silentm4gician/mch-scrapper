@@ -1,10 +1,13 @@
 // /api/anime.js
 import { getAnimePageData } from "../src/services/animeService.js";
+import { applyCors } from "../src/utils/cors.js";
 
 const cache = new Map();
 const CACHE_TTL = 1000 * 60 * 10; // 10 minutos
 
 export default async function handler(req, res) {
+  if (applyCors(req, res)) return;
+
   const { url } = req.query;
 
   if (!url) {

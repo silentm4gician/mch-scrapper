@@ -1,10 +1,13 @@
 import axios from "axios";
 import dotenv from "dotenv";
 import { getCache, setCache } from "../src/services/cacheService.js";
+import { applyCors } from "../src/utils/cors.js";
 
 dotenv.config();
 
 export default async function handler(req, res) {
+  if (applyCors(req, res)) return;
+
   const url = req.query.url;
   if (!url) return res.status(400).json({ error: "Missing URL" });
 

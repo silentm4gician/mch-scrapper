@@ -1,11 +1,14 @@
 // /api/main.js
 import { getMainPageData } from "../src/services/mainService.js";
+import { applyCors } from "../src/utils/cors.js";
 
 const cache = new Map();
 const CACHE_KEY = "main_page";
 const CACHE_TTL = 1000 * 60 * 5; // 5 minutos
 
 export default async function handler(req, res) {
+  if (applyCors(req, res)) return;
+
   try {
     const cached = cache.get(CACHE_KEY);
     const now = Date.now();
