@@ -1,12 +1,22 @@
 import axios from "axios";
 import dotenv from "dotenv";
 import { getCache, setCache } from "../src/services/cacheService.js";
-import { applyCors } from "../src/utils/cors.js";
+// import { applyCors } from "../src/utils/cors.js";
 
 dotenv.config();
 
 export default async function handler(req, res) {
-  if (applyCors(req, res)) return;
+  // CORS headers
+  const origin = req.headers.origin || "*";
+  res.setHeader("Access-Control-Allow-Origin", origin);
+  res.setHeader("Vary", "Origin"); // Mejora compatibilidad caché proxy
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    // 👇 Devuelve todos los headers CORS necesarios en la respuesta OPTIONS
+    return res.status(204).end();
+  }
 
   const url = req.query.url;
   if (!url) return res.status(400).json({ error: "Missing URL" });
