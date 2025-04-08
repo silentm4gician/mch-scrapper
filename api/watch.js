@@ -30,7 +30,7 @@ export default async function handler(req, res) {
       params: { url },
     });
 
-    const { videoUrl, iframe } = response.data;
+    const { videoUrl, iframe } = response.data.video;
 
     const cacheData = { videoUrl, iframe };
     await setCache(url, cacheData, 3600);
