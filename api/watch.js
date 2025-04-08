@@ -6,15 +6,14 @@ import { getCache, setCache } from "../src/services/cacheService.js";
 dotenv.config();
 
 export default async function handler(req, res) {
-  // CORS headers
+  // CORS...
   const origin = req.headers.origin || "*";
   res.setHeader("Access-Control-Allow-Origin", origin);
-  res.setHeader("Vary", "Origin"); // Mejora compatibilidad caché proxy
+  res.setHeader("Vary", "Origin");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   if (req.method === "OPTIONS") {
-    // 👇 Devuelve todos los headers CORS necesarios en la respuesta OPTIONS
     return res.status(204).end();
   }
 
@@ -25,25 +24,27 @@ export default async function handler(req, res) {
   const cached = await getCache(url);
   if (cached) {
     console.log("✅ Cache HIT");
-    return res.json({ iframe: cached });
+    return res.json(cached); // <-- Ya tiene videoUrl e iframe
   }
 
   console.log("🧠 Cache MISS");
+
   try {
     const response = await axios.get(process.env.PLAYWRIGHT_SERVICE_URL, {
       params: { url },
     });
 
-    const { iframe } = response.data;
+    const { videoUrl, iframe } = response.data;
 
     // Guardar en cache
-    await setCache(url, iframe, 3600); // TTL = 1h
+    const cacheData = { videoUrl, iframe };
+    await setCache(url, cacheData, 3600);
 
-    res.json({ iframe });
+    res.json(cacheData);
   } catch (error) {
     console.error("Error al contactar con el microservicio:", error.message);
     res
       .status(500)
-      .json({ error: "Error al obtener iframe desde el microservicio" });
+      .json({ error: "Error al obtener datos desde el microservicio" });
   }
 }
