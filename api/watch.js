@@ -1,23 +1,8 @@
 import axios from "axios";
-import * as cheerio from "cheerio";
 import dotenv from "dotenv";
 import { getCache, setCache } from "../src/services/cacheService.js";
 
 dotenv.config();
-
-// 🔍 Extrae el iframe embed de la página de monoschino2
-async function extractIframeUrlFromMonoschino(url) {
-  try {
-    const { data: html } = await axios.get(url);
-    const $ = cheerio.load(html);
-    const iframeSrc = $("div#player iframe").attr("src");
-
-    return iframeSrc?.startsWith("http") ? iframeSrc : null;
-  } catch (err) {
-    console.error("❌ Error extrayendo iframe:", err.message);
-    return null;
-  }
-}
 
 export default async function handler(req, res) {
   const origin = req.headers.origin || "*";
@@ -30,25 +15,6 @@ export default async function handler(req, res) {
 
   let url = req.query.url;
   if (!url) return res.status(400).json({ error: "Missing URL" });
-
-  // 🔁 Si es de monoschino, extraer el iframe embed
-  if (url.includes("monoschino2.com/ver/")) {
-    const extracted = await extractIframeUrlFromMonoschino(url);
-    if (!extracted)
-      return res.status(400).json({ error: "No se pudo extraer el iframe" });
-    url = extracted;
-  }
-
-  // 🧹 Si es un redirect.php?id=..., extraer el id y usarlo directamente
-  if (url.includes("redirect.php?id=")) {
-    const redirectMatch = url.match(/id=(https?:\/\/.+)$/);
-    if (redirectMatch) {
-      url = decodeURIComponent(redirectMatch[1]);
-      console.log("🔗 Limpiando redirect, nueva URL:", url);
-    }
-  }
-
-  console.log("🔍 URL final después de limpieza:", url);
 
   // 🚀 Cache
   const cached = await getCache(url);
