@@ -35,7 +35,7 @@ export async function fetchMainPageData() {
     const a = element.find("a");
     const href = a.attr("href");
     const url = `${BASE_URL}${href}`;
-    const id = href.replace(/^\//, "");
+    const id = href.replace(/^\/?ver\//, ""); // ✅ Limpia el prefijo "/ver/"
 
     const title = element.find("h2").text().trim();
     const episodeNumber = element.find("span.episode").text().trim();
