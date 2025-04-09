@@ -4,7 +4,7 @@ import { applyCors } from "../src/utils/cors.js";
 
 const cache = new Map();
 const CACHE_KEY = "main_page";
-const CACHE_TTL = 1000 * 60 * 5; // 5 minutos
+const CACHE_TTL = 1000 * 60 * 30; // 5 minutos
 
 export default async function handler(req, res) {
   if (applyCors(req, res)) return;

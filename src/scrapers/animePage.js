@@ -5,15 +5,16 @@ import { BASE_URL } from "../config.js";
 export async function fetchAnimePageData(url) {
   try {
     const { data: html } = await axios.get(url);
-
     const $ = cheerio.load(html);
+
+    const id = url.split("/").filter(Boolean).pop(); // <-- Extrae el id desde la URL
 
     const title = $("section.d-sm-none h2").text().trim();
     const description = $("section.d-sm-none p").text().trim();
-
     const image = $(".lazy.bg-secondary").attr("src") || null;
 
     const extraInfo = {};
+
     // Año y formato
     $("span.badge.text-bg-dark").each((_, el) => {
       const text = $(el).text().trim();
@@ -24,7 +25,7 @@ export async function fetchAnimePageData(url) {
       }
     });
 
-    // Datos de la descripción extendida
+    // Descripción extendida
     $(".tab-pane dl dt").each((_, el) => {
       const label = $(el).text().trim();
       const value = $(el).next("dd").text().trim();
@@ -41,7 +42,7 @@ export async function fetchAnimePageData(url) {
       .trim();
     if (estado) extraInfo.status = estado;
 
-    // Capitulos
+    // Número total de episodios
     const episodiosTexto = $(".bi-collection-play").parent().text();
     const matchEps = episodiosTexto.match(/Eps: (\d+)/i);
     if (matchEps) extraInfo.totalEpisodes = parseInt(matchEps[1]);
@@ -52,7 +53,7 @@ export async function fetchAnimePageData(url) {
       genres.push($(el).text().trim());
     });
 
-    // Episodios
+    // Episodios individuales
     const episodes = [];
     $(".eplist-container .episode-block li a").each((_, el) => {
       const episodeUrl = $(el).attr("href");
@@ -60,32 +61,32 @@ export async function fetchAnimePageData(url) {
         $(el).find("h2").text().trim() || $(el).text().trim();
       const match = episodeTitle.match(/Episodio\s+(\d+)/i);
       const episodeNumber = match ? parseInt(match[1]) : null;
+
       if (episodeUrl && episodeNumber !== null) {
+        const fullUrl = `${BASE_URL}${episodeUrl}`;
+        const id = episodeUrl.split("/").filter(Boolean).pop(); // <-- ID del episodio
+
         episodes.push({
+          id,
           number: episodeNumber,
           title: episodeTitle,
-          url: `${BASE_URL}${episodeUrl}`,
+          url: fullUrl,
         });
       }
     });
 
-    // Ordenar por número de episodio
     episodes.sort((a, b) => a.number - b.number);
 
-    // // Fallback a Playwright si faltan datos clave
-    // if (!description || genres.length === 0 || episodes.length === 0) {
-    //   console.warn("⚠️ Cheerio no encontró todo, usando Playwright...");
-    //   return await scrapeAnimePageWithPlaywright(url);
-    // }
-
-    return { title, description, genres, image, extraInfo, episodes };
+    return {
+      id,
+      title,
+      description,
+      genres,
+      image,
+      extraInfo,
+      episodes,
+    };
   } catch (err) {
     console.error("Error con Cheerio:", err);
-    // try {
-    //   return await scrapeAnimePageWithPlaywright(url);
-    // } catch (e) {
-    //   console.error("Error con Playwright:", e);
-    //   return { error: "No se pudo scrapear" };
-    // }
   }
 }
