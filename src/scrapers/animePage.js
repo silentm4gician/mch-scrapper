@@ -82,7 +82,7 @@ export async function fetchAnimePageData(url) {
         id,
         number: 1,
         title: "Película completa",
-        url,
+        url: `${BASE_URL}/ver/${id}-1`,
       });
     }
 
