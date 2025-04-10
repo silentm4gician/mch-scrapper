@@ -75,6 +75,17 @@ export async function fetchAnimePageData(url) {
       }
     });
 
+    // Si no hay episodios y es una película, crear uno por defecto
+    if (episodes.length === 0 && extraInfo.format === "Película") {
+      const id = url.split("/").filter(Boolean).pop();
+      episodes.push({
+        id,
+        number: 1,
+        title: "Película completa",
+        url,
+      });
+    }
+
     episodes.sort((a, b) => a.number - b.number);
 
     return {
