@@ -79,7 +79,7 @@ export async function fetchAnimePageData(url) {
     if (episodes.length === 0 && extraInfo.format === "Película") {
       const id = url.split("/").filter(Boolean).pop();
       episodes.push({
-        id,
+        id: `${id}-1`, // <-- ID de la película
         number: 1,
         title: "Película completa",
         url: `${BASE_URL}/ver/${id}-1`,
