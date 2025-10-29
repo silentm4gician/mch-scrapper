@@ -1,6 +1,7 @@
 import axios from "axios";
 import dotenv from "dotenv";
 import { getCache, setCache } from "../src/services/cacheService.js";
+import { getWatchIframe } from "../src/services/watchService.js";
 
 dotenv.config();
 
@@ -26,14 +27,9 @@ export default async function handler(req, res) {
   console.log("🧠 Cache MISS");
 
   try {
-    const response = await axios.get(process.env.PLAYWRIGHT_SERVICE_URL, {
-      params: { url },
-    });
+    const iframe = await getWatchIframe(url);
 
-    const { videoUrl, iframe, urlFetch, serverName, allIframes } =
-      response.data.video;
-
-    const cacheData = { videoUrl, iframe, urlFetch, serverName, allIframes };
+    const cacheData = { iframe };
     await setCache(url, cacheData, 3600);
 
     res.json(cacheData);
