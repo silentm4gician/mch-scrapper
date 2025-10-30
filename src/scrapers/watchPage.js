@@ -2,6 +2,7 @@
 
 import axios from "axios";
 import * as cheerio from "cheerio";
+import { getDirectVideoUrl } from "../services/videoService.js";
 
 /**
  * Extracts video sources from the page's JavaScript code
@@ -201,7 +202,7 @@ export async function scrapeWatchPage(url) {
       }
     }
 
-    return {
+    const result = {
       title,
       seriesTitle,
       seriesUrl,
@@ -217,6 +218,21 @@ export async function scrapeWatchPage(url) {
       timestamp: new Date().toISOString(),
       sourceUrl: url,
     };
+
+    // Add direct video URL if we have a video source
+    if (videoSources.length > 0) {
+      try {
+        const directUrl = await getDirectVideoUrl(videoSources[0].src);
+        result.directVideoUrl = directUrl;
+      } catch (error) {
+        console.warn("Could not get direct video URL:", error);
+        result.directVideoUrl = null;
+      }
+    } else {
+      result.directVideoUrl = null;
+    }
+
+    return result;
   } catch (error) {
     console.error("Error scraping watch page:", error);
     return {
